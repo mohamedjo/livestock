@@ -9,5 +9,5 @@ public class LivestockApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(LivestockApplication.class, args);
 	}
-
+int i=10;
 }
