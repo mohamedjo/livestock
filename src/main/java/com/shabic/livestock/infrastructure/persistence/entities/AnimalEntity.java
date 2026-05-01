@@ -37,14 +37,14 @@ public class AnimalEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "gender", length = 32)
-	private com.shabic.livestock.domain.model.Gender gender;
+	private com.shabic.livestock.domain.model.valueobject.Gender gender;
 
 	@Column(name = "birth_date")
 	private LocalDate birthDate;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 32)
-	private com.shabic.livestock.domain.model.AnimalStatus status;
+	private com.shabic.livestock.domain.model.valueobject.AnimalStatus status;
 
 	@Column(name = "farm_id", nullable = false)
 	private UUID farmId;

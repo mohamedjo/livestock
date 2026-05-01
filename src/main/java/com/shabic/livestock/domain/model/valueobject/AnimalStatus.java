@@ -1,4 +1,4 @@
-package com.shabic.livestock.domain.model;
+package com.shabic.livestock.domain.model.valueobject;
 
 public enum AnimalStatus {
 	ALIVE,
@@ -6,3 +6,4 @@ public enum AnimalStatus {
 	SLAUGHTERED,
 	DEAD
 }
+

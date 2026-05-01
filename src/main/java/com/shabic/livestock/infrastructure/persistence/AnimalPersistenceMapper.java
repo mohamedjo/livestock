@@ -1,7 +1,7 @@
 package com.shabic.livestock.infrastructure.persistence;
 
-import com.shabic.livestock.domain.model.Animal;
-import com.shabic.livestock.domain.model.TagNumber;
+import com.shabic.livestock.domain.model.aggregate.Animal;
+import com.shabic.livestock.domain.model.valueobject.TagNumber;
 import com.shabic.livestock.infrastructure.persistence.entities.AnimalEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

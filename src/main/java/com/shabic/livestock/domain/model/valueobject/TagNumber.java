@@ -1,4 +1,4 @@
-package com.shabic.livestock.domain.model;
+package com.shabic.livestock.domain.model.valueobject;
 
 import java.util.Objects;
 
@@ -34,3 +34,4 @@ public final class TagNumber {
 		return value;
 	}
 }
+

@@ -4,15 +4,8 @@ import com.shabic.livestock.api.dto.AnimalHistoryResponse;
 import com.shabic.livestock.api.dto.AnimalResponse;
 import com.shabic.livestock.api.dto.MoveAnimalRequest;
 import com.shabic.livestock.api.dto.RegisterAnimalRequest;
-import com.shabic.livestock.api.mappers.AnimalCommandMapper;
-import com.shabic.livestock.application.handlers.MoveAnimalHandler;
-import com.shabic.livestock.application.handlers.QueryHandlers;
-import com.shabic.livestock.application.handlers.RegisterAnimalHandler;
-import com.shabic.livestock.application.handlers.SellAnimalHandler;
-import com.shabic.livestock.application.queries.GetAnimalDetailsQuery;
-import com.shabic.livestock.application.queries.GetAnimalHistoryQuery;
-import com.shabic.livestock.application.queries.GetAnimalsByFarmQuery;
 import com.shabic.livestock.api.mappers.AnimalApiMapper;
+import com.shabic.livestock.application.service.AnimalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,34 +18,30 @@ import java.util.UUID;
 @RequestMapping("/api/animals")
 @RequiredArgsConstructor
 public class AnimalController {
-	private final RegisterAnimalHandler registerHandler;
-	private final MoveAnimalHandler moveHandler;
-	private final SellAnimalHandler sellHandler;
-	private final QueryHandlers queryHandlers;
-	private final AnimalCommandMapper commandMapper;
+	private final AnimalService animalService;
 	private final AnimalApiMapper apiMapper;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public UUID register(@Valid @RequestBody RegisterAnimalRequest req) {
-		return registerHandler.handle(commandMapper.toCommand(req));
+		return animalService.register(req);
 	}
 
 	@PostMapping("/{id}/move")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void move(@PathVariable("id") UUID animalId, @Valid @RequestBody MoveAnimalRequest req) {
-		moveHandler.handle(commandMapper.toCommand(animalId, req));
+		animalService.move(animalId, req);
 	}
 
 	@PostMapping("/{id}/sell")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void sell(@PathVariable("id") UUID animalId) {
-		sellHandler.handle(commandMapper.toSellCommand(animalId));
+		animalService.sell(animalId);
 	}
 
 	@GetMapping
 	public List<AnimalResponse> getByFarm(@RequestParam("farmId") UUID farmId) {
-		return queryHandlers.handle(GetAnimalsByFarmQuery.builder().farmId(farmId).build())
+		return animalService.getByFarm(farmId)
 				.stream()
 				.map(apiMapper::toResponse)
 				.toList();
@@ -60,14 +49,12 @@ public class AnimalController {
 
 	@GetMapping("/{id}")
 	public AnimalResponse getDetails(@PathVariable("id") UUID animalId) {
-		return apiMapper.toResponse(
-				queryHandlers.handle(GetAnimalDetailsQuery.builder().animalId(animalId).build())
-		);
+		return apiMapper.toResponse(animalService.getDetails(animalId));
 	}
 
 	@GetMapping("/{id}/history")
 	public List<AnimalHistoryResponse> history(@PathVariable("id") UUID animalId) {
-		return queryHandlers.handle(GetAnimalHistoryQuery.builder().animalId(animalId).build())
+		return animalService.history(animalId)
 				.stream()
 				.map(apiMapper::toResponse)
 				.toList();

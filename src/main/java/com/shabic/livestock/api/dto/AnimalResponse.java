@@ -1,7 +1,7 @@
 package com.shabic.livestock.api.dto;
 
-import com.shabic.livestock.domain.model.AnimalStatus;
-import com.shabic.livestock.domain.model.Gender;
+import com.shabic.livestock.domain.model.valueobject.AnimalStatus;
+import com.shabic.livestock.domain.model.valueobject.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

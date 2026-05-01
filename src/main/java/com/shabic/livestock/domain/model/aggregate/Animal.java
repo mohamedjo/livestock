@@ -1,4 +1,8 @@
-package com.shabic.livestock.domain.model;
+package com.shabic.livestock.domain.model.aggregate;
+
+import com.shabic.livestock.domain.model.valueobject.AnimalStatus;
+import com.shabic.livestock.domain.model.valueobject.Gender;
+import com.shabic.livestock.domain.model.valueobject.TagNumber;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -151,3 +155,4 @@ public final class Animal {
 		);
 	}
 }
+
