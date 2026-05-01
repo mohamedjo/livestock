@@ -5,6 +5,7 @@ import com.shabic.livestock.api.dto.AnimalResponse;
 import com.shabic.livestock.api.dto.MoveAnimalRequest;
 import com.shabic.livestock.api.dto.RegisterAnimalRequest;
 import com.shabic.livestock.api.mappers.AnimalApiMapper;
+import com.shabic.livestock.api.mappers.AnimalCommandMapper;
 import com.shabic.livestock.application.service.AnimalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,24 +20,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AnimalController {
 	private final AnimalService animalService;
+	private final AnimalCommandMapper commandMapper;
 	private final AnimalApiMapper apiMapper;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public UUID register(@Valid @RequestBody RegisterAnimalRequest req) {
-		return animalService.register(req);
+		return animalService.register(commandMapper.toCommand(req));
 	}
 
 	@PostMapping("/{id}/move")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void move(@PathVariable("id") UUID animalId, @Valid @RequestBody MoveAnimalRequest req) {
-		animalService.move(animalId, req);
+		animalService.move(commandMapper.toMoveCommand(animalId, req));
 	}
 
 	@PostMapping("/{id}/sell")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void sell(@PathVariable("id") UUID animalId) {
-		animalService.sell(animalId);
+		animalService.sell(commandMapper.toSellCommand(animalId));
 	}
 
 	@GetMapping
@@ -60,4 +62,3 @@ public class AnimalController {
 				.toList();
 	}
 }
-

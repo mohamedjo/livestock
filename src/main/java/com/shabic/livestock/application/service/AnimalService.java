@@ -1,7 +1,8 @@
 package com.shabic.livestock.application.service;
 
-import com.shabic.livestock.api.dto.MoveAnimalRequest;
-import com.shabic.livestock.api.dto.RegisterAnimalRequest;
+import com.shabic.livestock.application.command.MoveAnimalCommand;
+import com.shabic.livestock.application.command.RegisterAnimalCommand;
+import com.shabic.livestock.application.command.SellAnimalCommand;
 import com.shabic.livestock.application.handlers.AnimalHistoryAppender;
 import com.shabic.livestock.domain.events.AnimalCreated;
 import com.shabic.livestock.domain.events.AnimalMoved;
@@ -30,24 +31,24 @@ public class AnimalService {
 	private final AnimalEventPublisher publisher;
 
 	@Transactional
-	public UUID register(RegisterAnimalRequest req) {
+	public UUID register(RegisterAnimalCommand cmd) {
 		Instant now = Instant.now();
 		UUID id = UUID.randomUUID();
 
-		TagNumber tagNumber = new TagNumber(req.getTagNumber());
+		TagNumber tagNumber = new TagNumber(cmd.tagNumber());
 		if (animalRepo.findByTagNumber(tagNumber).isPresent()) {
 			throw new IllegalArgumentException("tagNumber already exists");
 		}
-		Gender gender = Gender.fromNullableString(req.getGender());
+		Gender gender = Gender.fromNullableString(cmd.gender());
 		Animal animal = Animal.register(
 				id,
 				tagNumber,
-				req.getType(),
-				req.getBreed(),
+				cmd.type(),
+				cmd.breed(),
 				gender,
-				req.getBirthDate(),
-				req.getFarmId(),
-				req.getInitialLocationId(),
+				cmd.birthDate(),
+				cmd.farmId(),
+				cmd.initialLocationId(),
 				now
 		);
 
@@ -61,12 +62,12 @@ public class AnimalService {
 	}
 
 	@Transactional
-	public void move(UUID animalId, MoveAnimalRequest req) {
-		Animal animal = animalRepo.findById(animalId)
+	public void move(MoveAnimalCommand cmd) {
+		Animal animal = animalRepo.findById(cmd.animalId())
 				.orElseThrow(() -> new IllegalArgumentException("animal not found"));
 		UUID from = animal.currentLocationId();
 
-		animal.moveTo(req.getToLocationId());
+		animal.moveTo(cmd.toLocationId());
 		animalRepo.save(animal);
 
 		Instant now = Instant.now();
@@ -76,8 +77,8 @@ public class AnimalService {
 	}
 
 	@Transactional
-	public void sell(UUID animalId) {
-		Animal animal = animalRepo.findById(animalId)
+	public void sell(SellAnimalCommand cmd) {
+		Animal animal = animalRepo.findById(cmd.animalId())
 				.orElseThrow(() -> new IllegalArgumentException("animal not found"));
 		animal.sell();
 		animalRepo.save(animal);
@@ -104,4 +105,3 @@ public class AnimalService {
 		return historyRepo.findByAnimalId(animalId);
 	}
 }
-
