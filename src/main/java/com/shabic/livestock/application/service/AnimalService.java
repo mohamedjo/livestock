@@ -12,7 +12,6 @@ import com.shabic.livestock.domain.model.valueobject.Gender;
 import com.shabic.livestock.domain.model.valueobject.TagNumber;
 import com.shabic.livestock.domain.repository.AnimalHistoryRepository;
 import com.shabic.livestock.domain.repository.AnimalRepository;
-import com.shabic.livestock.domain.service.AnimalRegistrationService;
 import com.shabic.livestock.infrastructure.messaging.AnimalEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,11 +34,14 @@ public class AnimalService {
 		Instant now = Instant.now();
 		UUID id = UUID.randomUUID();
 
-		var registration = new AnimalRegistrationService(animalRepo);
+		TagNumber tagNumber = new TagNumber(req.getTagNumber());
+		if (animalRepo.findByTagNumber(tagNumber).isPresent()) {
+			throw new IllegalArgumentException("tagNumber already exists");
+		}
 		Gender gender = Gender.fromNullableString(req.getGender());
-		Animal animal = registration.register(
+		Animal animal = Animal.register(
 				id,
-				new TagNumber(req.getTagNumber()),
+				tagNumber,
 				req.getType(),
 				req.getBreed(),
 				gender,
