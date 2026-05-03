@@ -1,7 +1,6 @@
 package com.shabic.livestock.infrastructure.persistence.adapters;
 
 import com.shabic.livestock.domain.model.aggregate.Animal;
-import com.shabic.livestock.domain.model.valueobject.TagNumber;
 import com.shabic.livestock.domain.repository.AnimalRepository;
 import com.shabic.livestock.infrastructure.persistence.AnimalPersistenceMapper;
 import com.shabic.livestock.infrastructure.persistence.repositories.AnimalJpaRepository;
@@ -24,9 +23,11 @@ public class JpaAnimalRepository implements AnimalRepository {
 	}
 
 	@Override
-	public Optional<Animal> findByTagNumber(TagNumber tagNumber) {
-		if (tagNumber == null) return Optional.empty();
-		return jpa.findByTagNumber(tagNumber.value()).map(mapper::toDomain);
+	public Optional<Animal> findByTagNumber(String tagNumber) {
+		if (tagNumber == null || tagNumber.isBlank()) {
+			return Optional.empty();
+		}
+		return jpa.findByTagNumber(tagNumber.trim()).map(mapper::toDomain);
 	}
 
 	@Override
@@ -39,4 +40,3 @@ public class JpaAnimalRepository implements AnimalRepository {
 		jpa.save(mapper.toEntity(animal));
 	}
 }
-
