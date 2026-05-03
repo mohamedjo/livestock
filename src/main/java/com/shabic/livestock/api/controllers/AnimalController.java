@@ -29,6 +29,11 @@ public class AnimalController {
 		return animalService.register(commandMapper.toCommand(req));
 	}
 
+	@PutMapping("/{id}")
+	public AnimalResponse update(@PathVariable("id") UUID animalId, @Valid @RequestBody RegisterAnimalRequest request) {
+		return apiMapper.toResponse(animalService.update(commandMapper.toUpdateCommand(animalId, request)));
+	}
+
 	@PostMapping("/{id}/move")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void move(@PathVariable("id") UUID animalId, @Valid @RequestBody MoveAnimalRequest req) {

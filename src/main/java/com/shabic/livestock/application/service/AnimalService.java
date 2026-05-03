@@ -3,6 +3,7 @@ package com.shabic.livestock.application.service;
 import com.shabic.livestock.application.command.MoveAnimalCommand;
 import com.shabic.livestock.application.command.RegisterAnimalCommand;
 import com.shabic.livestock.application.command.SellAnimalCommand;
+import com.shabic.livestock.application.command.UpdateAnimalCommand;
 import com.shabic.livestock.domain.events.AnimalCreated;
 import com.shabic.livestock.domain.events.AnimalMoved;
 import com.shabic.livestock.domain.events.AnimalSold;
@@ -90,6 +91,69 @@ public class AnimalService {
 		publisher.publish(animalCreatedEvent);
 
 		return registeredAnimal.getId();
+	}
+
+	@Transactional
+	public Animal update(UpdateAnimalCommand updateAnimalCommand) {
+		Animal existingAnimal = animalRepo.findById(updateAnimalCommand.animalId())
+				.orElseThrow(() -> new IllegalArgumentException("animal not found"));
+		RegisterAnimalCommand details = updateAnimalCommand.details();
+		if (!existingAnimal.getFarmId().equals(details.farmId())) {
+			throw new IllegalArgumentException("farmId cannot be changed");
+		}
+
+		String normalizedTagNumber = normalizeOptionalString(details.tagNumber());
+		if (normalizedTagNumber != null) {
+			animalRepo.findByTagNumber(normalizedTagNumber)
+					.filter(candidate -> !candidate.getId().equals(updateAnimalCommand.animalId()))
+					.ifPresent(candidate -> {
+						throw new IllegalArgumentException("tagNumber already exists");
+					});
+		}
+		if (details.motherAnimalId() != null) {
+			if (details.motherAnimalId().equals(updateAnimalCommand.animalId())) {
+				throw new IllegalArgumentException("motherAnimalId cannot reference the same animal");
+			}
+			animalRepo.findById(details.motherAnimalId())
+					.orElseThrow(() -> new IllegalArgumentException("mother animal not found"));
+		}
+
+		Gender gender = Gender.fromNullableString(details.gender());
+		MethodAcquired methodAcquired = MethodAcquired.fromNullableString(details.methodAcquired());
+		Set<String> feedTypes = details.feedTypes() == null || details.feedTypes().isEmpty()
+				? Set.of()
+				: Set.copyOf(details.feedTypes());
+		AnimalStatus updatedStatus = AnimalStatus.parseInitialStatus(details.status());
+
+		Animal updatedAnimal = Animal.rehydrate(
+				existingAnimal.getId(),
+				normalizedTagNumber,
+				details.type(),
+				details.breed(),
+				gender,
+				details.birthDate(),
+				details.farmId(),
+				details.motherAnimalId(),
+				details.shedId(),
+				details.batchId(),
+				details.assignDate(),
+				methodAcquired,
+				feedTypes,
+				details.labelsKeywords(),
+				details.internalId(),
+				details.coloring(),
+				details.additionalTagNumbers(),
+				details.electronicId(),
+				details.markingLeft(),
+				details.markingRight(),
+				details.description(),
+				details.initialLocationId(),
+				updatedStatus,
+				existingAnimal.getCreatedAt()
+		);
+
+		animalRepo.save(updatedAnimal);
+		return updatedAnimal;
 	}
 
 	@Transactional
