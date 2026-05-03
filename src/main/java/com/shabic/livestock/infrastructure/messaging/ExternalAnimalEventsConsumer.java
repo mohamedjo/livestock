@@ -2,7 +2,7 @@ package com.shabic.livestock.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.shabic.livestock.application.handlers.AnimalHistoryAppender;
+import com.shabic.livestock.application.service.AnimalHistoryAppenderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ExternalAnimalEventsConsumer {
 	private final ObjectMapper objectMapper;
-	private final AnimalHistoryAppender historyAppender;
+	private final AnimalHistoryAppenderService historyAppender;
 
 	@Value("${livestock.kafka.topics.animal-fed}")
 	private String animalFedTopic;

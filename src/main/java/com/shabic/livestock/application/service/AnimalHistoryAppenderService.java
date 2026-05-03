@@ -1,4 +1,4 @@
-package com.shabic.livestock.application.handlers;
+package com.shabic.livestock.application.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shabic.livestock.domain.events.DomainEvent;
@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class AnimalHistoryAppender {
+public class AnimalHistoryAppenderService {
 	private final AnimalHistoryRepository historyRepo;
 	private final ObjectMapper objectMapper;
 
