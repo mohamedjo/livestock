@@ -1,12 +1,7 @@
 package com.shabic.livestock.application.service;
 
-import com.shabic.livestock.application.command.MoveAnimalCommand;
 import com.shabic.livestock.application.command.RegisterAnimalCommand;
-import com.shabic.livestock.application.command.SellAnimalCommand;
 import com.shabic.livestock.application.command.UpdateAnimalCommand;
-import com.shabic.livestock.domain.events.AnimalCreated;
-import com.shabic.livestock.domain.events.AnimalMoved;
-import com.shabic.livestock.domain.events.AnimalSold;
 import com.shabic.livestock.domain.model.AnimalHistoryRecord;
 import com.shabic.livestock.domain.model.aggregate.Animal;
 import com.shabic.livestock.domain.model.valueobject.AnimalStatus;
@@ -14,7 +9,6 @@ import com.shabic.livestock.domain.model.valueobject.Gender;
 import com.shabic.livestock.domain.model.valueobject.MethodAcquired;
 import com.shabic.livestock.domain.repository.AnimalHistoryRepository;
 import com.shabic.livestock.domain.repository.AnimalRepository;
-import com.shabic.livestock.infrastructure.messaging.AnimalEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +23,6 @@ import java.util.UUID;
 public class AnimalService {
 	private final AnimalRepository animalRepo;
 	private final AnimalHistoryRepository historyRepo;
-	private final AnimalHistoryAppenderService animalHistoryAppender;
-	private final AnimalEventPublisher publisher;
 
 	@Transactional
 	public UUID register(RegisterAnimalCommand registerAnimalCommand) {
@@ -80,15 +72,6 @@ public class AnimalService {
 		);
 
 		animalRepo.save(registeredAnimal);
-
-//		AnimalCreated animalCreatedEvent = new AnimalCreated(
-//				registeredAnimal.getId(),
-//				registeredAnimal.getFarmId(),
-//				registeredAnimal.getType(),
-//				registeredAt
-//		);
-//		animalHistoryAppender.append(registeredAnimal.getId(), animalCreatedEvent);
-//		publisher.publish(animalCreatedEvent);
 
 		return registeredAnimal.getId();
 	}
@@ -154,40 +137,6 @@ public class AnimalService {
 
 		animalRepo.save(updatedAnimal);
 		return updatedAnimal;
-	}
-
-	@Transactional
-	public void move(MoveAnimalCommand moveAnimalCommand) {
-		Animal animal = animalRepo.findById(moveAnimalCommand.animalId())
-				.orElseThrow(() -> new IllegalArgumentException("animal not found"));
-		UUID previousLocationId = animal.getCurrentLocationId();
-
-		animal.moveTo(moveAnimalCommand.toLocationId());
-		animalRepo.save(animal);
-
-		Instant movedAt = Instant.now();
-		AnimalMoved animalMovedEvent = new AnimalMoved(
-				animal.getId(),
-				animal.getFarmId(),
-				previousLocationId,
-				animal.getCurrentLocationId(),
-				movedAt
-		);
-		animalHistoryAppender.append(animal.getId(), animalMovedEvent);
-		publisher.publish(animalMovedEvent);
-	}
-
-	@Transactional
-	public void sell(SellAnimalCommand sellAnimalCommand) {
-		Animal animal = animalRepo.findById(sellAnimalCommand.animalId())
-				.orElseThrow(() -> new IllegalArgumentException("animal not found"));
-		animal.sell();
-		animalRepo.save(animal);
-
-		Instant soldAt = Instant.now();
-		AnimalSold animalSoldEvent = new AnimalSold(animal.getId(), animal.getFarmId(), soldAt);
-		animalHistoryAppender.append(animal.getId(), animalSoldEvent);
-		publisher.publish(animalSoldEvent);
 	}
 
 	@Transactional(readOnly = true)

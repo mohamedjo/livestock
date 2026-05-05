@@ -225,18 +225,6 @@ public final class Animal {
 		);
 	}
 
-	public void moveTo(UUID newLocationId) {
-		ensureActive();
-		if (newLocationId == null) throw new IllegalArgumentException("newLocationId is required");
-		if (newLocationId.equals(currentLocationId)) return;
-		this.currentLocationId = newLocationId;
-	}
-
-	public void sell() {
-		ensureActive();
-		this.status = AnimalStatus.SOLD;
-	}
-
 	public void slaughter() {
 		ensureActive();
 		this.status = AnimalStatus.SLAUGHTERED;

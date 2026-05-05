@@ -2,7 +2,6 @@ package com.shabic.livestock.api.controllers;
 
 import com.shabic.livestock.api.dto.AnimalHistoryResponse;
 import com.shabic.livestock.api.dto.AnimalResponse;
-import com.shabic.livestock.api.dto.MoveAnimalRequest;
 import com.shabic.livestock.api.dto.RegisterAnimalRequest;
 import com.shabic.livestock.api.mappers.AnimalApiMapper;
 import com.shabic.livestock.api.mappers.AnimalCommandMapper;
@@ -32,18 +31,6 @@ public class AnimalController {
 	@PutMapping("/{id}")
 	public AnimalResponse update(@PathVariable("id") UUID animalId, @Valid @RequestBody RegisterAnimalRequest request) {
 		return apiMapper.toResponse(animalService.update(commandMapper.toUpdateCommand(animalId, request)));
-	}
-
-	@PostMapping("/{id}/move")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void move(@PathVariable("id") UUID animalId, @Valid @RequestBody MoveAnimalRequest request) {
-		animalService.move(commandMapper.toMoveCommand(animalId, request));
-	}
-
-	@PostMapping("/{id}/sell")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void sell(@PathVariable("id") UUID animalId) {
-		animalService.sell(commandMapper.toSellCommand(animalId));
 	}
 
 	@GetMapping

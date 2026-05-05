@@ -22,19 +22,15 @@ public class OpenApiCustomizersConfig {
 	public OpenApiCustomizer animalApiDocsCustomiser(
 			OpenApiDocProperties props,
 			@org.springframework.beans.factory.annotation.Value("classpath:api-examples/register_or_update_animal.json") Resource registerOrUpdateExample,
-			@org.springframework.beans.factory.annotation.Value("classpath:api-examples/register_minimal.json") Resource registerMinimalExample,
-			@org.springframework.beans.factory.annotation.Value("classpath:api-examples/move_animal.json") Resource moveExample
+			@org.springframework.beans.factory.annotation.Value("classpath:api-examples/register_minimal.json") Resource registerMinimalExample
 	) {
 		String registerOrUpdateJson = readUtf8(registerOrUpdateExample);
 		String registerMinimalJson = readUtf8(registerMinimalExample);
-		String moveJson = readUtf8(moveExample);
 
 		return openApi -> {
 			addAnimalTag(openApi, props);
 			customizeAnimalsPost(openApi, props, registerOrUpdateJson, registerMinimalJson);
 			customizeAnimalsPut(openApi, props, registerOrUpdateJson);
-			customizeAnimalsMove(openApi, props, moveJson);
-			customizeAnimalsSell(openApi, props);
 			customizeAnimalsGetByFarm(openApi, props);
 			customizeAnimalsGetById(openApi, props);
 			customizeAnimalsHistory(openApi, props);
@@ -93,35 +89,6 @@ public class OpenApiCustomizersConfig {
 		ApiResponses responses = ensureResponses(path.getPut());
 		responses.addApiResponse("200", new ApiResponse().description("Updated animal"));
 		responses.addApiResponse("400", new ApiResponse().description("Validation error, farm mismatch, duplicate tag, or invalid mother"));
-	}
-
-	private static void customizeAnimalsMove(OpenAPI openApi, OpenApiDocProperties props, String moveJson) {
-		var path = openApi.getPaths() == null ? null : openApi.getPaths().get("/api/animals/{id}/move");
-		if (path == null || path.getPost() == null) return;
-
-		path.getPost().setTags(java.util.List.of(props.tagAnimalsName()));
-		path.getPost().setSummary("Move animal");
-		path.getPost().setDescription("Changes current location. Animal must be ALIVE.");
-
-		ensureJsonRequestExamples(path.getPost().getRequestBody(),
-				Map.of(props.exampleMoveName(), example(moveJson)));
-
-		ApiResponses responses = ensureResponses(path.getPost());
-		responses.addApiResponse("204", new ApiResponse().description("Moved"));
-		responses.addApiResponse("400", new ApiResponse().description("Animal not found or not allowed to move"));
-	}
-
-	private static void customizeAnimalsSell(OpenAPI openApi, OpenApiDocProperties props) {
-		var path = openApi.getPaths() == null ? null : openApi.getPaths().get("/api/animals/{id}/sell");
-		if (path == null || path.getPost() == null) return;
-
-		path.getPost().setTags(java.util.List.of(props.tagAnimalsName()));
-		path.getPost().setSummary("Sell animal");
-		path.getPost().setDescription("Marks the animal as SOLD. Must be ALIVE.");
-
-		ApiResponses responses = ensureResponses(path.getPost());
-		responses.addApiResponse("204", new ApiResponse().description("Sold"));
-		responses.addApiResponse("400", new ApiResponse().description("Animal not found or not ALIVE"));
 	}
 
 	private static void customizeAnimalsGetByFarm(OpenAPI openApi, OpenApiDocProperties props) {

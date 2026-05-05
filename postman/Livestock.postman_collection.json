@@ -16,10 +16,6 @@
 		{
 			"key": "animalId",
 			"value": "REPLACE_AFTER_REGISTER"
-		},
-		{
-			"key": "locationId",
-			"value": "660e8400-e29b-41d4-a716-446655440010"
 		}
 	],
 	"item": [
@@ -98,30 +94,6 @@
 					"request": {
 						"method": "GET",
 						"url": "{{baseUrl}}/api/animals/{{animalId}}/history"
-					}
-				},
-				{
-					"name": "Move animal",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"toLocationId\": \"{{locationId}}\"\n}"
-						},
-						"url": "{{baseUrl}}/api/animals/{{animalId}}/move"
-					}
-				},
-				{
-					"name": "Sell animal",
-					"request": {
-						"method": "POST",
-						"url": "{{baseUrl}}/api/animals/{{animalId}}/sell"
 					}
 				}
 			]

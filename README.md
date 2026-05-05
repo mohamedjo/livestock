@@ -38,9 +38,6 @@ The service reads defaults from `src/main/resources/application.properties` and 
 - `KAFKA_BOOTSTRAP_SERVERS` (default `localhost:9092`)
 - `KAFKA_CONSUMER_GROUP_ID` (default `livestock-service`)
 - Topics:
-  - `KAFKA_TOPIC_ANIMAL_CREATED` (default `livestock.animal.created`)
-  - `KAFKA_TOPIC_ANIMAL_MOVED` (default `livestock.animal.moved`)
-  - `KAFKA_TOPIC_ANIMAL_SOLD` (default `livestock.animal.sold`)
   - `KAFKA_TOPIC_ANIMAL_FED` (default `livestock.animal.fed`)
   - `KAFKA_TOPIC_ANIMAL_VACCINATED` (default `livestock.animal.vaccinated`)
 
@@ -83,20 +80,6 @@ Request body:
 
 Response: `201 Created` with the created animal UUID.
 
-### Move animal (Command)
-`POST /api/animals/{id}/move`
-
-```json
-{ "toLocationId": "00000000-0000-0000-0000-000000000011" }
-```
-
-Response: `204 No Content`
-
-### Sell animal (Command)
-`POST /api/animals/{id}/sell`
-
-Response: `204 No Content`
-
 ### Get animals by farm (Query)
 `GET /api/animals?farmId={farmId}`
 
@@ -108,23 +91,7 @@ Response: `204 No Content`
 
 ## Events (Kafka)
 
-### Produced events
-- `AnimalCreated` → topic `livestock.animal.created`
-- `AnimalMoved` → topic `livestock.animal.moved`
-- `AnimalSold` → topic `livestock.animal.sold`
-
-Payloads are published as JSON strings (serialized with Jackson).
-
-Example `AnimalCreated`:
-
-```json
-{
-  "animalId": "uuid",
-  "farmId": "uuid",
-  "type": "cow",
-  "timestamp": "2026-01-01T10:00:00Z"
-}
-```
+The REST API does not publish domain events to Kafka in the current codebase. Incoming external messages are consumed for `animal_history` only.
 
 ### Consumed events (for audit/history)
 - `AnimalFed` → topic `livestock.animal.fed`
@@ -135,6 +102,6 @@ The consumer stores them in `animal_history` if the payload contains `animalId`.
 ## Business rules implemented
 - `Animal` is the aggregate root.
 - Lifecycle transitions enforced:
-  - Only `ALIVE` animals can be moved/sold/slaughtered/marked dead.
-- All state changes write to `animal_history` and publish the corresponding domain event.
+  - Only `ALIVE` animals can be slaughtered or marked dead (domain methods; not exposed via REST in this service).
+- External `AnimalFed` / `AnimalVaccinated` payloads are appended to `animal_history` when consumed from Kafka.
 

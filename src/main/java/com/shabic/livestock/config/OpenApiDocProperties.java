@@ -15,7 +15,6 @@ public record OpenApiDocProperties(
 		String exampleRegisterFullName,
 		String exampleRegisterMinimalName,
 		String exampleUpdateName,
-		String exampleMoveName,
 		String responseAnimalIdExample
 ) {
 }
