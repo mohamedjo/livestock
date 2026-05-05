@@ -1,0 +1,25 @@
+{
+  "tagNumber": "EAR-1001",
+  "type": "Sheep",
+  "breed": "Harri",
+  "gender": "FEMALE",
+  "birthDate": "2024-01-15",
+  "farmId": "550e8400-e29b-41d4-a716-446655440000",
+  "initialLocationId": "660e8400-e29b-41d4-a716-446655440001",
+  "motherAnimalId": null,
+  "shedId": "770e8400-e29b-41d4-a716-446655440002",
+  "batchId": "880e8400-e29b-41d4-a716-446655440003",
+  "assignDate": "2026-05-01",
+  "methodAcquired": "RAISED_ON_FARM",
+  "feedTypes": ["Mixed pellets", "Hay"],
+  "labelsKeywords": "Dairy, Stud",
+  "internalId": "A-001",
+  "coloring": "White",
+  "additionalTagNumbers": "LOT-99",
+  "electronicId": "RFID-778899",
+  "markingLeft": "Blue dot",
+  "markingRight": null,
+  "description": "Healthy ewe",
+  "status": "Active"
+}
+

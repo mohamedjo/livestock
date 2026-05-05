@@ -25,8 +25,8 @@ public class AnimalController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public UUID register(@Valid @RequestBody RegisterAnimalRequest req) {
-		return animalService.register(commandMapper.toCommand(req));
+	public UUID register(@Valid @RequestBody RegisterAnimalRequest request) {
+		return animalService.register(commandMapper.toCommand(request));
 	}
 
 	@PutMapping("/{id}")
@@ -36,8 +36,8 @@ public class AnimalController {
 
 	@PostMapping("/{id}/move")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void move(@PathVariable("id") UUID animalId, @Valid @RequestBody MoveAnimalRequest req) {
-		animalService.move(commandMapper.toMoveCommand(animalId, req));
+	public void move(@PathVariable("id") UUID animalId, @Valid @RequestBody MoveAnimalRequest request) {
+		animalService.move(commandMapper.toMoveCommand(animalId, request));
 	}
 
 	@PostMapping("/{id}/sell")

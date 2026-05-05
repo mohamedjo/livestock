@@ -1,0 +1,130 @@
+{
+	"info": {
+		"name": "Livestock API",
+		"description": "Import OpenAPI alternative: http://localhost:8080/v3/api-docs\nSwagger UI: http://localhost:8080/swagger-ui.html",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "farmId",
+			"value": "550e8400-e29b-41d4-a716-446655440000"
+		},
+		{
+			"key": "animalId",
+			"value": "REPLACE_AFTER_REGISTER"
+		},
+		{
+			"key": "locationId",
+			"value": "660e8400-e29b-41d4-a716-446655440010"
+		}
+	],
+	"item": [
+		{
+			"name": "Animals",
+			"item": [
+				{
+					"name": "Register animal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tagNumber\": \"EAR-1001\",\n  \"type\": \"Sheep\",\n  \"breed\": \"Harri\",\n  \"gender\": \"FEMALE\",\n  \"birthDate\": \"2024-01-15\",\n  \"farmId\": \"{{farmId}}\",\n  \"initialLocationId\": \"660e8400-e29b-41d4-a716-446655440001\",\n  \"motherAnimalId\": null,\n  \"shedId\": \"770e8400-e29b-41d4-a716-446655440002\",\n  \"batchId\": \"880e8400-e29b-41d4-a716-446655440003\",\n  \"assignDate\": \"2026-05-01\",\n  \"methodAcquired\": \"RAISED_ON_FARM\",\n  \"feedTypes\": [\"Mixed pellets\", \"Hay\"],\n  \"labelsKeywords\": \"Dairy, Stud\",\n  \"internalId\": \"A-001\",\n  \"coloring\": \"White\",\n  \"additionalTagNumbers\": \"LOT-99\",\n  \"electronicId\": \"RFID-778899\",\n  \"markingLeft\": \"Blue dot\",\n  \"markingRight\": null,\n  \"description\": \"Healthy ewe\",\n  \"status\": \"Active\"\n}"
+						},
+						"url": "{{baseUrl}}/api/animals",
+						"description": "Response is plain UUID text (animal id). Copy it into collection variable `animalId`."
+					}
+				},
+				{
+					"name": "Register animal (minimal)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Sheep\",\n  \"farmId\": \"{{farmId}}\",\n  \"breed\": \"Harri\",\n  \"gender\": \"MALE\",\n  \"status\": \"Active\"\n}"
+						},
+						"url": "{{baseUrl}}/api/animals"
+					}
+				},
+				{
+					"name": "Update animal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tagNumber\": \"EAR-1001-UPD\",\n  \"type\": \"Sheep\",\n  \"breed\": \"Harri\",\n  \"gender\": \"FEMALE\",\n  \"birthDate\": \"2024-01-15\",\n  \"farmId\": \"{{farmId}}\",\n  \"initialLocationId\": \"660e8400-e29b-41d4-a716-446655440001\",\n  \"motherAnimalId\": null,\n  \"shedId\": \"770e8400-e29b-41d4-a716-446655440002\",\n  \"batchId\": \"880e8400-e29b-41d4-a716-446655440003\",\n  \"assignDate\": \"2026-05-03\",\n  \"methodAcquired\": \"RAISED_ON_FARM\",\n  \"feedTypes\": [\"Hay\"],\n  \"labelsKeywords\": \"Fiber\",\n  \"internalId\": \"A-001\",\n  \"coloring\": \"White\",\n  \"additionalTagNumbers\": null,\n  \"electronicId\": null,\n  \"markingLeft\": null,\n  \"markingRight\": null,\n  \"description\": \"Updated notes\",\n  \"status\": \"Active\"\n}"
+						},
+						"url": "{{baseUrl}}/api/animals/{{animalId}}",
+						"description": "`farmId` in body must match the animal's existing farm."
+					}
+				},
+				{
+					"name": "List by farm",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/animals?farmId={{farmId}}"
+					}
+				},
+				{
+					"name": "Get animal",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/animals/{{animalId}}"
+					}
+				},
+				{
+					"name": "Animal history",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/animals/{{animalId}}/history"
+					}
+				},
+				{
+					"name": "Move animal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"toLocationId\": \"{{locationId}}\"\n}"
+						},
+						"url": "{{baseUrl}}/api/animals/{{animalId}}/move"
+					}
+				},
+				{
+					"name": "Sell animal",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/animals/{{animalId}}/sell"
+					}
+				}
+			]
+		}
+	]
+}
