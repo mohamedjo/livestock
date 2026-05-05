@@ -81,14 +81,14 @@ public class AnimalService {
 
 		animalRepo.save(registeredAnimal);
 
-		AnimalCreated animalCreatedEvent = new AnimalCreated(
-				registeredAnimal.getId(),
-				registeredAnimal.getFarmId(),
-				registeredAnimal.getType(),
-				registeredAt
-		);
-		animalHistoryAppender.append(registeredAnimal.getId(), animalCreatedEvent);
-		publisher.publish(animalCreatedEvent);
+//		AnimalCreated animalCreatedEvent = new AnimalCreated(
+//				registeredAnimal.getId(),
+//				registeredAnimal.getFarmId(),
+//				registeredAnimal.getType(),
+//				registeredAt
+//		);
+//		animalHistoryAppender.append(registeredAnimal.getId(), animalCreatedEvent);
+//		publisher.publish(animalCreatedEvent);
 
 		return registeredAnimal.getId();
 	}
