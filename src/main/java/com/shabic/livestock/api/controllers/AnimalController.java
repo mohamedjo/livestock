@@ -9,6 +9,7 @@ import com.shabic.livestock.application.service.AnimalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,17 +24,20 @@ public class AnimalController {
 	private final AnimalApiMapper apiMapper;
 
 	@PostMapping
+	@PreAuthorize("hasAnyRole('FARM_USER', 'FARM_ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public UUID register(@Valid @RequestBody RegisterAnimalRequest request) {
 		return animalService.register(commandMapper.toCommand(request));
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAnyRole('FARM_USER', 'FARM_ADMIN')")
 	public AnimalResponse update(@PathVariable("id") UUID animalId, @Valid @RequestBody RegisterAnimalRequest request) {
 		return apiMapper.toResponse(animalService.update(commandMapper.toUpdateCommand(animalId, request)));
 	}
 
 	@GetMapping
+	@PreAuthorize("hasAnyRole( 'FARM_ADMIN', 'FARM_USER')")
 	public List<AnimalResponse> getByFarm(@RequestParam("farmId") UUID farmId) {
 		return animalService.getByFarm(farmId)
 				.stream()
@@ -42,11 +46,13 @@ public class AnimalController {
 	}
 
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'FARM_ADMIN', 'FARM_USER')")
 	public AnimalResponse getDetails(@PathVariable("id") UUID animalId) {
 		return apiMapper.toResponse(animalService.getDetails(animalId));
 	}
 
 	@GetMapping("/{id}/history")
+	@PreAuthorize("hasAnyRole('ADMIN', 'FARM_ADMIN', 'FARM_USER')")
 	public List<AnimalHistoryResponse> history(@PathVariable("id") UUID animalId) {
 		return animalService.history(animalId)
 				.stream()
