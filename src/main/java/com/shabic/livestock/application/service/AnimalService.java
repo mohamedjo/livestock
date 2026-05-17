@@ -2,6 +2,8 @@ package com.shabic.livestock.application.service;
 
 import com.shabic.livestock.application.command.RegisterAnimalCommand;
 import com.shabic.livestock.application.command.UpdateAnimalCommand;
+import com.shabic.livestock.application.messaging.AnimalEventPublisher;
+import com.shabic.livestock.domain.events.AnimalCreated;
 import com.shabic.livestock.domain.model.AnimalHistoryRecord;
 import com.shabic.livestock.domain.model.aggregate.Animal;
 import com.shabic.livestock.domain.model.valueobject.AnimalStatus;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class AnimalService {
 	private final AnimalRepository animalRepo;
 	private final AnimalHistoryRepository historyRepo;
+	private final AnimalEventPublisher animalEventPublisher;
 
 	@Transactional
 	public UUID register(RegisterAnimalCommand registerAnimalCommand) {
@@ -72,6 +75,13 @@ public class AnimalService {
 		);
 
 		animalRepo.save(registeredAnimal);
+
+		animalEventPublisher.publishAnimalCreated(new AnimalCreated(
+				registeredAnimal.getId(),
+				registeredAnimal.getFarmId(),
+				registeredAnimal.getType(),
+				registeredAt
+		));
 
 		return registeredAnimal.getId();
 	}

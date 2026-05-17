@@ -2,6 +2,8 @@ package com.shabic.livestock.application.service;
 
 import com.shabic.livestock.application.command.RegisterAnimalCommand;
 import com.shabic.livestock.application.command.UpdateAnimalCommand;
+import com.shabic.livestock.application.messaging.AnimalEventPublisher;
+import com.shabic.livestock.domain.events.AnimalCreated;
 import com.shabic.livestock.domain.model.AnimalHistoryRecord;
 import com.shabic.livestock.domain.model.aggregate.Animal;
 import com.shabic.livestock.domain.model.valueobject.AnimalStatus;
@@ -33,14 +35,16 @@ class AnimalServiceTest {
 
 	@Mock private AnimalRepository animalRepo;
 	@Mock private AnimalHistoryRepository historyRepo;
+	@Mock private AnimalEventPublisher animalEventPublisher;
 
 	@Captor private ArgumentCaptor<Animal> animalCaptor;
+	@Captor private ArgumentCaptor<AnimalCreated> animalCreatedCaptor;
 
 	private AnimalService service;
 
 	@BeforeEach
 	void setUp() {
-		service = new AnimalService(animalRepo, historyRepo);
+		service = new AnimalService(animalRepo, historyRepo, animalEventPublisher);
 	}
 
 	@Test
@@ -58,6 +62,14 @@ class AnimalServiceTest {
 		assertThat(saved.getType()).isEqualTo(cmd.type());
 		assertThat(saved.getCurrentLocationId()).isEqualTo(cmd.initialLocationId());
 		assertThat(saved.getStatus()).isEqualTo(AnimalStatus.ALIVE);
+
+		verify(animalEventPublisher).publishAnimalCreated(animalCreatedCaptor.capture());
+		AnimalCreated published = animalCreatedCaptor.getValue();
+		assertThat(published.animalId()).isEqualTo(id);
+		assertThat(published.farmId()).isEqualTo(cmd.farmId());
+		assertThat(published.type()).isEqualTo(cmd.type());
+		assertThat(published.eventType()).isEqualTo("AnimalCreated");
+		assertThat(published.timestamp()).isNotNull();
 	}
 
 	@Test
@@ -70,6 +82,7 @@ class AnimalServiceTest {
 				.hasMessage("tagNumber already exists");
 
 		verify(animalRepo, never()).save(any());
+		verify(animalEventPublisher, never()).publishAnimalCreated(any());
 	}
 
 	@Test
@@ -84,6 +97,7 @@ class AnimalServiceTest {
 				.hasMessage("mother animal not found");
 
 		verify(animalRepo, never()).save(any());
+		verify(animalEventPublisher, never()).publishAnimalCreated(any());
 	}
 
 	@Test
