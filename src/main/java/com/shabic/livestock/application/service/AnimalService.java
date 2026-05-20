@@ -3,6 +3,7 @@ package com.shabic.livestock.application.service;
 import com.shabic.livestock.application.command.RegisterAnimalCommand;
 import com.shabic.livestock.application.command.UpdateAnimalCommand;
 import com.shabic.livestock.application.messaging.AnimalEventPublisher;
+import com.shabic.livestock.application.lookup.FarmLookup;
 import com.shabic.livestock.domain.events.AnimalCreated;
 import com.shabic.livestock.domain.model.AnimalHistoryRecord;
 import com.shabic.livestock.domain.model.aggregate.Animal;
@@ -26,11 +27,14 @@ public class AnimalService {
 	private final AnimalRepository animalRepo;
 	private final AnimalHistoryRepository historyRepo;
 	private final AnimalEventPublisher animalEventPublisher;
+	private final FarmLookup farmLookup;
 
 	@Transactional
 	public UUID register(RegisterAnimalCommand registerAnimalCommand) {
 		Instant registeredAt = Instant.now();
 		UUID newAnimalId = UUID.randomUUID();
+
+		farmLookup.assertFarmExists(registerAnimalCommand.farmId());
 
 		String normalizedTagNumber = normalizeOptionalString(registerAnimalCommand.tagNumber());
 		if (normalizedTagNumber != null && animalRepo.findByTagNumber(normalizedTagNumber).isPresent()) {
@@ -94,6 +98,8 @@ public class AnimalService {
 		if (!existingAnimal.getFarmId().equals(details.farmId())) {
 			throw new IllegalArgumentException("farmId cannot be changed");
 		}
+
+		farmLookup.assertFarmExists(details.farmId());
 
 		String normalizedTagNumber = normalizeOptionalString(details.tagNumber());
 		if (normalizedTagNumber != null) {

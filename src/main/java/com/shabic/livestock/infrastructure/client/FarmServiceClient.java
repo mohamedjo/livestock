@@ -1,0 +1,54 @@
+package com.shabic.livestock.infrastructure.client;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
+
+import java.util.UUID;
+
+@Component
+public class FarmServiceClient {
+	private final RestClient restClient;
+	private final String serviceToken;
+
+	public FarmServiceClient(
+			RestClient.Builder restClientBuilder,
+			@Value("${livestock.farm-service.base-url}") String baseUrl,
+			@Value("${livestock.farm-service.service-token:}") String serviceToken) {
+		this.restClient = restClientBuilder.baseUrl(baseUrl).build();
+		this.serviceToken = serviceToken == null ? "" : serviceToken.trim();
+	}
+
+	public void assertFarmExists(UUID farmId) {
+		try {
+			restClient.get()
+					.uri("/api/farms/{id}", farmId)
+					.headers(headers -> resolveAuthorization().ifPresent(headers::setBearerAuth))
+					.retrieve()
+					.toBodilessEntity();
+		} catch (RestClientResponseException e) {
+			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+				throw new IllegalArgumentException("farm not found");
+			}
+			throw new IllegalStateException("farm service rejected request: " + e.getStatusCode(), e);
+		} catch (RestClientException e) {
+			throw new IllegalStateException("farm service unavailable", e);
+		}
+	}
+
+	private java.util.Optional<String> resolveAuthorization() {
+		var auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth instanceof JwtAuthenticationToken jwtAuth) {
+			return java.util.Optional.of(jwtAuth.getToken().getTokenValue());
+		}
+		if (!serviceToken.isEmpty()) {
+			return java.util.Optional.of(serviceToken);
+		}
+		return java.util.Optional.empty();
+	}
+}

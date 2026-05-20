@@ -3,6 +3,7 @@ package com.shabic.livestock.application.service;
 import com.shabic.livestock.application.command.RegisterAnimalCommand;
 import com.shabic.livestock.application.command.UpdateAnimalCommand;
 import com.shabic.livestock.application.messaging.AnimalEventPublisher;
+import com.shabic.livestock.application.lookup.FarmLookup;
 import com.shabic.livestock.domain.events.AnimalCreated;
 import com.shabic.livestock.domain.model.AnimalHistoryRecord;
 import com.shabic.livestock.domain.model.aggregate.Animal;
@@ -36,6 +37,7 @@ class AnimalServiceTest {
 	@Mock private AnimalRepository animalRepo;
 	@Mock private AnimalHistoryRepository historyRepo;
 	@Mock private AnimalEventPublisher animalEventPublisher;
+	@Mock private FarmLookup farmLookup;
 
 	@Captor private ArgumentCaptor<Animal> animalCaptor;
 	@Captor private ArgumentCaptor<AnimalCreated> animalCreatedCaptor;
@@ -44,7 +46,7 @@ class AnimalServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		service = new AnimalService(animalRepo, historyRepo, animalEventPublisher);
+		service = new AnimalService(animalRepo, historyRepo, animalEventPublisher, farmLookup);
 	}
 
 	@Test
@@ -70,6 +72,19 @@ class AnimalServiceTest {
 		assertThat(published.type()).isEqualTo(cmd.type());
 		assertThat(published.eventType()).isEqualTo("AnimalCreated");
 		assertThat(published.timestamp()).isNotNull();
+	}
+
+	@Test
+	void register_rejectsWhenFarmNotFound() {
+		RegisterAnimalCommand cmd = minimalRegisterCommand("TAG-1", null);
+		doThrow(new IllegalArgumentException("farm not found")).when(farmLookup).assertFarmExists(cmd.farmId());
+
+		assertThatThrownBy(() -> service.register(cmd))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("farm not found");
+
+		verify(animalRepo, never()).save(any());
+		verify(animalEventPublisher, never()).publishAnimalCreated(any());
 	}
 
 	@Test
@@ -109,6 +124,22 @@ class AnimalServiceTest {
 		assertThatThrownBy(() -> service.update(cmd))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("animal not found");
+	}
+
+	@Test
+	void update_rejectsWhenFarmNotFound() {
+		UUID farmId = UUID.randomUUID();
+		UUID animalId = UUID.randomUUID();
+		Animal existing = existingAnimal(farmId, animalId, "TAG-1");
+		when(animalRepo.findById(animalId)).thenReturn(Optional.of(existing));
+		doThrow(new IllegalArgumentException("farm not found")).when(farmLookup).assertFarmExists(farmId);
+
+		UpdateAnimalCommand cmd = new UpdateAnimalCommand(animalId, minimalRegisterCommand("TAG-1", null, farmId));
+
+		assertThatThrownBy(() -> service.update(cmd))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("farm not found");
+		verify(animalRepo, never()).save(any());
 	}
 
 	@Test
