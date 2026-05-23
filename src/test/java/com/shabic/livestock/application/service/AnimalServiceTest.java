@@ -67,6 +67,7 @@ class AnimalServiceTest {
 
 		verify(animalEventPublisher).publishAnimalCreated(animalCreatedCaptor.capture());
 		AnimalCreated published = animalCreatedCaptor.getValue();
+		assertThat(published.eventId()).isNotNull();
 		assertThat(published.animalId()).isEqualTo(id);
 		assertThat(published.farmId()).isEqualTo(cmd.farmId());
 		assertThat(published.type()).isEqualTo(cmd.type());

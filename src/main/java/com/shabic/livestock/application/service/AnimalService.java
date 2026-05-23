@@ -33,6 +33,7 @@ public class AnimalService {
 	public UUID register(RegisterAnimalCommand registerAnimalCommand) {
 		Instant registeredAt = Instant.now();
 		UUID newAnimalId = UUID.randomUUID();
+		UUID eventId = UUID.randomUUID();
 
 		farmLookup.assertFarmExists(registerAnimalCommand.farmId());
 
@@ -81,6 +82,7 @@ public class AnimalService {
 		animalRepo.save(registeredAnimal);
 
 		animalEventPublisher.publishAnimalCreated(new AnimalCreated(
+				eventId,
 				registeredAnimal.getId(),
 				registeredAnimal.getFarmId(),
 				registeredAnimal.getType(),
