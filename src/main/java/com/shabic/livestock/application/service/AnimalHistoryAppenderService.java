@@ -30,8 +30,4 @@ public class AnimalHistoryAppenderService {
 			throw new RuntimeException("Failed to write animal_history event", e);
 		}
 	}
-
-	public void append(UUID animalId, DomainEvent event) {
-		append(animalId, event.eventType(), event, event.timestamp());
-	}
 }
