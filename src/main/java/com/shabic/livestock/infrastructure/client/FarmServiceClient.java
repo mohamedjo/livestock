@@ -32,13 +32,24 @@ public class FarmServiceClient {
 					.retrieve()
 					.toBodilessEntity();
 		} catch (RestClientResponseException e) {
-			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+			if (isFarmNotFound(e)) {
 				throw new IllegalArgumentException("farm not found");
 			}
-			throw new IllegalStateException("farm service rejected request: " + e.getStatusCode(), e);
+			if (e.getStatusCode().is4xxClientError()) {
+				throw new IllegalArgumentException("farm service rejected request: " + e.getStatusCode());
+			}
+			throw new IllegalStateException("farm service unavailable: " + e.getStatusCode(), e);
 		} catch (RestClientException e) {
 			throw new IllegalStateException("farm service unavailable", e);
 		}
+	}
+
+	private static boolean isFarmNotFound(RestClientResponseException e) {
+		if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+			return true;
+		}
+		String body = e.getResponseBodyAsString();
+		return body != null && body.contains("farm not found");
 	}
 
 	private java.util.Optional<String> resolveAuthorization() {

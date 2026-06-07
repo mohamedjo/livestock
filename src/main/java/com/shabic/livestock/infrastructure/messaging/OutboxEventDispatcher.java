@@ -1,5 +1,6 @@
 package com.shabic.livestock.infrastructure.messaging;
 
+import com.shabic.livestock.config.correlation.CorrelationIdKafka;
 import com.shabic.livestock.domain.repository.OutboxRepository;
 import com.shabic.livestock.domain.repository.OutboxRepository.OutboxMessage;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,11 @@ public class OutboxEventDispatcher {
 		List<OutboxMessage> pending = outboxRepo.findUnpublished(batchSize);
 		Instant publishedAt = Instant.now();
 		for (OutboxMessage message : pending) {
-			kafkaTemplate.send(message.topic(), message.messageKey(), message.payload());
+			kafkaTemplate.send(CorrelationIdKafka.producerRecord(
+					message.topic(),
+					message.messageKey(),
+					message.payload(),
+					message.correlationId()));
 			outboxRepo.markPublished(message.id(), publishedAt);
 		}
 	}

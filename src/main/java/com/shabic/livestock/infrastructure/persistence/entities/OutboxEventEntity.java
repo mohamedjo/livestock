@@ -37,4 +37,7 @@ public class OutboxEventEntity {
 
 	@Column(name = "published_at")
 	private Instant publishedAt;
+
+	@Column(name = "correlation_id", length = 255)
+	private String correlationId;
 }

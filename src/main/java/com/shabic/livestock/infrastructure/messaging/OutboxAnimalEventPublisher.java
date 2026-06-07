@@ -3,6 +3,7 @@ package com.shabic.livestock.infrastructure.messaging;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shabic.livestock.application.messaging.AnimalEventPublisher;
+import com.shabic.livestock.config.correlation.CorrelationIdContext;
 import com.shabic.livestock.domain.events.AnimalCreated;
 import com.shabic.livestock.domain.repository.OutboxRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,8 @@ public class OutboxAnimalEventPublisher implements AnimalEventPublisher {
 					animalCreatedTopic,
 					event.animalId().toString(),
 					payload,
-					event.timestamp()
+					event.timestamp(),
+					CorrelationIdContext.get().orElse(null)
 			);
 		} catch (JsonProcessingException e) {
 			throw new IllegalStateException("Failed to serialize AnimalCreated event", e);

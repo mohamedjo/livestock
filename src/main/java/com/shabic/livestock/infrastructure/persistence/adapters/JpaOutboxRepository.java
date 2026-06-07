@@ -17,13 +17,14 @@ public class JpaOutboxRepository implements OutboxRepository {
 	private final OutboxEventJpaRepository jpa;
 
 	@Override
-	public void enqueue(UUID id, String topic, String messageKey, String payload, Instant createdAt) {
+	public void enqueue(UUID id, String topic, String messageKey, String payload, Instant createdAt, String correlationId) {
 		jpa.save(OutboxEventEntity.builder()
 				.id(id)
 				.topic(topic)
 				.messageKey(messageKey)
 				.payload(payload)
 				.createdAt(createdAt)
+				.correlationId(correlationId)
 				.build());
 	}
 
@@ -34,7 +35,8 @@ public class JpaOutboxRepository implements OutboxRepository {
 						entity.getId(),
 						entity.getTopic(),
 						entity.getMessageKey(),
-						entity.getPayload()))
+						entity.getPayload(),
+						entity.getCorrelationId()))
 				.toList();
 	}
 
