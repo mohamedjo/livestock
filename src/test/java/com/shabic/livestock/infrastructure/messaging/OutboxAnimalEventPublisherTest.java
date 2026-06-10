@@ -2,8 +2,10 @@ package com.shabic.livestock.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.shabic.livestock.config.correlation.CorrelationIdContext;
 import com.shabic.livestock.domain.events.AnimalCreated;
 import com.shabic.livestock.domain.repository.OutboxRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +31,11 @@ class OutboxAnimalEventPublisherTest {
 
 	private OutboxAnimalEventPublisher publisher;
 
+	@AfterEach
+	void tearDown() {
+		CorrelationIdContext.clear();
+	}
+
 	@BeforeEach
 	void setUp() {
 		ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -43,6 +50,7 @@ class OutboxAnimalEventPublisherTest {
 		UUID farmId = UUID.randomUUID();
 		Instant timestamp = Instant.parse("2025-01-15T10:00:00Z");
 		AnimalCreated event = new AnimalCreated(eventId, animalId, farmId, "Cow", timestamp);
+		CorrelationIdContext.set("corr-123");
 
 		publisher.publishAnimalCreated(event);
 
@@ -51,7 +59,8 @@ class OutboxAnimalEventPublisherTest {
 				eq("livestock.animal.created"),
 				eq(animalId.toString()),
 				payloadCaptor.capture(),
-				eq(timestamp)
+				eq(timestamp),
+				eq("corr-123")
 		);
 
 		AnimalCreated deserialized = new ObjectMapper()

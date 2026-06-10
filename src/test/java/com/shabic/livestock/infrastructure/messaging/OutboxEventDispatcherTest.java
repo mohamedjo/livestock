@@ -1,7 +1,9 @@
 package com.shabic.livestock.infrastructure.messaging;
 
+import com.shabic.livestock.config.correlation.CorrelationId;
 import com.shabic.livestock.domain.repository.OutboxRepository;
 import com.shabic.livestock.domain.repository.OutboxRepository.OutboxMessage;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +18,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -28,6 +31,7 @@ class OutboxEventDispatcherTest {
 	@Mock private KafkaTemplate<String, String> kafkaTemplate;
 
 	@Captor private ArgumentCaptor<Instant> publishedAtCaptor;
+	@Captor private ArgumentCaptor<ProducerRecord<String, String>> producerRecordCaptor;
 
 	private OutboxEventDispatcher dispatcher;
 
@@ -44,13 +48,20 @@ class OutboxEventDispatcherTest {
 				outboxId,
 				"livestock.animal.created",
 				"animal-key",
-				"{\"eventType\":\"AnimalCreated\"}"
+				"{\"eventType\":\"AnimalCreated\"}",
+				"corr-456"
 		);
 		when(outboxRepo.findUnpublished(50)).thenReturn(List.of(message));
 
 		dispatcher.dispatchPendingEvents();
 
-		verify(kafkaTemplate).send("livestock.animal.created", "animal-key", message.payload());
+		verify(kafkaTemplate).send(producerRecordCaptor.capture());
+		ProducerRecord<String, String> record = producerRecordCaptor.getValue();
+		assertThat(record.topic()).isEqualTo("livestock.animal.created");
+		assertThat(record.key()).isEqualTo("animal-key");
+		assertThat(record.value()).isEqualTo(message.payload());
+		assertThat(record.headers().lastHeader(CorrelationId.HEADER_NAME).value())
+				.isEqualTo("corr-456".getBytes());
 		verify(outboxRepo).markPublished(eq(outboxId), publishedAtCaptor.capture());
 		verifyNoMoreInteractions(kafkaTemplate);
 	}
