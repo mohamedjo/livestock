@@ -7,7 +7,7 @@
 			defaultValue="logs/livestock-%d{yyyy-MM-dd}.%i.log.gz"/>
 
 	<property name="APP_LOG_PATTERN"
-			value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId:-}] %-5level %logger{36} - %msg%n"/>
+			value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-},%X{spanId:-}] [%X{correlationId:-}] %-5level %logger{36} - %msg%n"/>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>

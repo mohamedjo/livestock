@@ -3,6 +3,7 @@ package com.shabic.livestock.infrastructure.messaging;
 import com.shabic.livestock.config.correlation.CorrelationIdKafka;
 import com.shabic.livestock.domain.repository.OutboxRepository;
 import com.shabic.livestock.domain.repository.OutboxRepository.OutboxMessage;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -24,6 +25,7 @@ public class OutboxEventDispatcher {
 
 	@Scheduled(fixedDelayString = "${livestock.outbox.dispatch.fixed-delay-ms:2000}")
 	@Transactional
+	@Observed(name = "outbox.dispatch")
 	public void dispatchPendingEvents() {
 		List<OutboxMessage> pending = outboxRepo.findUnpublished(batchSize);
 		Instant publishedAt = Instant.now();
