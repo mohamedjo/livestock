@@ -1,5 +1,7 @@
 package com.shabic.livestock.infrastructure.client;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +26,8 @@ public class FarmServiceClient {
 		this.serviceToken = serviceToken == null ? "" : serviceToken.trim();
 	}
 
+	@CircuitBreaker(name = "farmService", fallbackMethod = "assertFarmExistsFallback")
+	@Retry(name = "farmService")
 	public void assertFarmExists(UUID farmId) {
 		try {
 			restClient.get()
@@ -42,6 +46,11 @@ public class FarmServiceClient {
 		} catch (RestClientException e) {
 			throw new IllegalStateException("farm service unavailable", e);
 		}
+	}
+
+	@SuppressWarnings("unused")
+	private void assertFarmExistsFallback(UUID farmId, Throwable cause) {
+		throw new IllegalStateException("farm service unavailable", cause);
 	}
 
 	private static boolean isFarmNotFound(RestClientResponseException e) {

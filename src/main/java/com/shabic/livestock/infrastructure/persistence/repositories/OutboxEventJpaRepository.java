@@ -14,4 +14,7 @@ public interface OutboxEventJpaRepository extends JpaRepository<OutboxEventEntit
 			ORDER BY e.createdAt ASC
 			""")
 	List<OutboxEventEntity> findUnpublished(org.springframework.data.domain.Pageable pageable);
+
+	@Query("SELECT COUNT(e) FROM OutboxEventEntity e WHERE e.publishedAt IS NULL")
+	long countUnpublished();
 }

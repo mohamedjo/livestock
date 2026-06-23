@@ -24,6 +24,7 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll()
 				.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+				.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/prometheus").permitAll()
 				.anyRequest().authenticated());
 		http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(
 				jwtAuthenticationConverter(keycloakJwtAuthoritiesConverter))));
