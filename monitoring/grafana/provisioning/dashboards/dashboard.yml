@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Livestock
+    orgId: 1
+    folder: Livestock
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards
