@@ -156,13 +156,19 @@
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
-          ]
-        }
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
       },
       "targets": [
         {
+          "editorMode": "code",
           "expr": "resilience4j_circuitbreaker_state{name=\"farmService\", application=\"livestock\"}",
+          "instant": true,
           "legendFormat": "farmService",
+          "range": false,
           "refId": "A"
         }
       ],
@@ -229,7 +235,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(resilience4j_circuitbreaker_calls_total{name=\"farmService\", application=\"livestock\"}[5m])) by (kind)",
+          "expr": "sum(increase(resilience4j_circuitbreaker_calls_total{name=\"farmService\", application=\"livestock\"}[$__rate_interval])) by (kind)",
           "legendFormat": "{{kind}}",
           "refId": "A"
         }

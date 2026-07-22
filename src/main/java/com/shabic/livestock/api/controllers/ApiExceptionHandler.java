@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,12 @@ public class ApiExceptionHandler {
 	@ExceptionHandler(IllegalStateException.class)
 	public ResponseEntity<ApiError> conflict(IllegalStateException e) {
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("CONFLICT", e.getMessage()));
+	}
+
+	@ExceptionHandler(RestClientException.class)
+	public ResponseEntity<ApiError> farmServiceUnavailable(RestClientException e) {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(new ApiError("CONFLICT", "farm service unavailable"));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

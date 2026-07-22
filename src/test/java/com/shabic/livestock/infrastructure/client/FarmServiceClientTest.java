@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.UUID;
 
@@ -68,5 +69,16 @@ class FarmServiceClientTest {
 		assertThatThrownBy(() -> client.assertFarmExists(farmId))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("farm service rejected request: 400 BAD_REQUEST");
+	}
+
+	@Test
+	void assertFarmExists_propagatesServerErrorForResilience4j() {
+		UUID farmId = UUID.randomUUID();
+		server.expect(requestTo("http://localhost:8081/api/farms/" + farmId))
+				.andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE)
+						.contentType(MediaType.APPLICATION_JSON));
+
+		assertThatThrownBy(() -> client.assertFarmExists(farmId))
+				.isInstanceOf(RestClientResponseException.class);
 	}
 }

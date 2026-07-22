@@ -42,9 +42,7 @@ public class FarmServiceClient {
 			if (e.getStatusCode().is4xxClientError()) {
 				throw new IllegalArgumentException("farm service rejected request: " + e.getStatusCode());
 			}
-			throw new IllegalStateException("farm service unavailable: " + e.getStatusCode(), e);
-		} catch (RestClientException e) {
-			throw new IllegalStateException("farm service unavailable", e);
+			throw e;
 		}
 	}
 
